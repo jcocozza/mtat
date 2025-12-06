@@ -25,10 +25,15 @@ func arrivals(w http.ResponseWriter, r *http.Request) {
 		} else {
 			stopIDs = []string{fmt.Sprintf("%s%s", stationId, direction)}
 		}
-		arrivals, err := GetFutureArrivals(url, stopIDs)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+
+		var arrivals []Arrival
+		for _, stopId := range stopIDs {
+			a, err := GetFutureArrivals(stopId)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			arrivals = append(arrivals, a...)
 		}
 
 		times := make([]string, len(arrivals))
