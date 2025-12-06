@@ -1,25 +1,25 @@
 package main
 
 import (
+	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"os"
-	"errors"
 	"strconv"
-	"encoding/csv"
 )
 
 type Station struct {
-	Id string
+	Id   string
 	Name string
 	// direction -> stop
-	Stops map[string]Stop	
+	Stops map[string]Stop
 }
 
 type Stop struct {
-	Id string
+	Id        string
 	Direction string
-	Latitude float64
+	Latitude  float64
 	Longitude float64
 }
 
@@ -47,7 +47,9 @@ func ParseStopId(id string) (string, string, error) {
 // return map [station id]-> station
 func ReadStops(path string) (map[string]Station, error) {
 	f, err := os.Open(path)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	rdr := csv.NewReader(f)
 	header, err := rdr.Read()
 	if err != nil {
@@ -56,7 +58,7 @@ func ReadStops(path string) (map[string]Station, error) {
 
 	cols := make(map[string]int)
 	for i, colName := range header {
-		cols[colName]	= i
+		cols[colName] = i
 	}
 
 	stations := make(map[string]Station)
@@ -68,7 +70,7 @@ func ReadStops(path string) (map[string]Station, error) {
 		if err != nil {
 			return nil, err
 		}
-		
+
 		stopId := row[cols["stop_id"]]
 		name := row[cols["stop_name"]]
 		latStr := row[cols["stop_lat"]]
@@ -76,28 +78,36 @@ func ReadStops(path string) (map[string]Station, error) {
 		locationType := row[cols["location_type"]]
 
 		lat, err := strconv.ParseFloat(latStr, 64)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 		lon, err := strconv.ParseFloat(lonStr, 64)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 
 		stationId, direction, err := ParseStopId(stopId)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 
 		isParent := locationType == "1"
 
 		if _, exists := stations[stationId]; !exists {
 			station := Station{
-				Id: stationId,
-				Name: name,
+				Id:    stationId,
+				Name:  name,
 				Stops: make(map[string]Stop),
 			}
 			stations[stationId] = station
-			if isParent { continue }
+			if isParent {
+				continue
+			}
 		}
 		stop := Stop{
-			Id: stopId,
+			Id:        stopId,
 			Direction: direction,
-			Latitude: lat,
+			Latitude:  lat,
 			Longitude: lon,
 		}
 		stations[stationId].Stops[direction] = stop

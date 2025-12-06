@@ -1,11 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net/http"
-	"time"
-	"fmt"
 	"slices"
+	"time"
 
 	"github.com/MobilityData/gtfs-realtime-bindings/golang/gtfs"
 	"google.golang.org/protobuf/proto"

@@ -1,15 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
 )
 
 func arrivals(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		stationId := r.PathValue("station")	
+		stationId := r.PathValue("station")
 		if stationId == "" {
 			http.Error(w, "station id required", http.StatusBadRequest)
 			return
@@ -18,7 +18,7 @@ func arrivals(w http.ResponseWriter, r *http.Request) {
 
 		var stopIDs []string
 		if direction == "" {
-				stopIDs = []string{
+			stopIDs = []string{
 				fmt.Sprintf("%s%s", stationId, "N"),
 				fmt.Sprintf("%s%s", stationId, "S"),
 			}
@@ -41,7 +41,7 @@ func arrivals(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
-	}	
+	}
 }
 
 func Serve(port int) error {

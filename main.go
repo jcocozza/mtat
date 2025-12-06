@@ -1,9 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
-	"flag"
 )
 
 const (
@@ -25,7 +25,6 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "%s <command> -h for more info on a command\n", os.Args[0])
 }
 
-
 func main() {
 	flag.Usage = usage
 	flag.Parse()
@@ -39,7 +38,7 @@ func main() {
 
 	switch args[0] {
 	case "serve":
-		saCmd := flag.NewFlagSet("serve", flag.ExitOnError)	
+		saCmd := flag.NewFlagSet("serve", flag.ExitOnError)
 		port := saCmd.Int("port", 8080, "port to run the server on")
 		saCmd.Parse(args[1:])
 		err := Serve(*port)
