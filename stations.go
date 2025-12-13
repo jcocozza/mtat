@@ -7,28 +7,27 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"slices"
 )
 
 type SubwayRealTimeFeedURL string
 
 const (
-	SRTF_ACESr SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
-	SRTF_G SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g"
-	SRTF_NQRW SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw"
+	SRTF_ACESr    SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
+	SRTF_G        SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g"
+	SRTF_NQRW     SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-nqrw"
 	SRTF_1234567S SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
-	SRTF_BDFMSf SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
-	SRTF_JZ SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz"
-	SRTF_L SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l"
-	SRTF_SIR SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si"
+	SRTF_BDFMSf   SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
+	SRTF_JZ       SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-jz"
+	SRTF_L        SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-l"
+	SRTF_SIR      SubwayRealTimeFeedURL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-si"
 )
 
 type Subway string
 
 const (
-	SUBWAY_A Subway = "A"
-	SUBWAY_C Subway = "C"
-	SUBWAY_E Subway = "E"
+	SUBWAY_A  Subway = "A"
+	SUBWAY_C  Subway = "C"
+	SUBWAY_E  Subway = "E"
 	SUBWAY_Sr Subway = "Sr"
 
 	SUBWAY_N Subway = "N"
@@ -45,10 +44,10 @@ const (
 	SUBWAY_7 Subway = "7"
 	SUBWAY_S Subway = "S"
 
-	SUBWAY_B Subway = "B"
-	SUBWAY_D Subway = "D"
-	SUBWAY_F Subway = "F"
-	SUBWAY_M Subway = "M"
+	SUBWAY_B  Subway = "B"
+	SUBWAY_D  Subway = "D"
+	SUBWAY_F  Subway = "F"
+	SUBWAY_M  Subway = "M"
 	SUBWAY_Sf Subway = "Sf"
 
 	SUBWAY_J Subway = "J"
@@ -163,7 +162,7 @@ func ReadStations() (map[string]Station, error) {
 	stations := make(map[string]Station)
 	for {
 		row, err := rdr.Read()
-		if errors.Is(io.EOF, err) {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -215,11 +214,11 @@ func ReadStations() (map[string]Station, error) {
 }
 
 type StopTime struct {
-	TripId string
-	StopId string
-	ArrivalTime string
+	TripId        string
+	StopId        string
+	ArrivalTime   string
 	DepartureTime string
-	StopSequence string
+	StopSequence  string
 }
 
 // read the stop_times.txt file
@@ -244,7 +243,7 @@ func ReadStopTimes() ([]StopTime, error) {
 	var stopTimes []StopTime
 	for {
 		row, err := rdr.Read()
-		if errors.Is(io.EOF, err) {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -252,11 +251,11 @@ func ReadStopTimes() ([]StopTime, error) {
 		}
 
 		stopTime := StopTime{
-			TripId : row[cols["trip_id"]],
-			StopId : row[cols["stop_id"]],
-			ArrivalTime : row[cols["arrival_time"]],
-			DepartureTime : row[cols["departure_time"]],
-			StopSequence : row[cols["stop_sequence"]],
+			TripId:        row[cols["trip_id"]],
+			StopId:        row[cols["stop_id"]],
+			ArrivalTime:   row[cols["arrival_time"]],
+			DepartureTime: row[cols["departure_time"]],
+			StopSequence:  row[cols["stop_sequence"]],
 		}
 
 		stopTimes = append(stopTimes, stopTime)
@@ -265,12 +264,12 @@ func ReadStopTimes() ([]StopTime, error) {
 }
 
 type Trip struct {
-	RouteId string
-	TripId string
-	ServiceId string
+	RouteId      string
+	TripId       string
+	ServiceId    string
 	TripHeadSign string
-	DirectionId string
-	ShapeId string
+	DirectionId  string
+	ShapeId      string
 }
 
 // read the trips.txt file
@@ -296,7 +295,7 @@ func ReadTrips() ([]Trip, error) {
 	var trips []Trip
 	for {
 		row, err := rdr.Read()
-		if errors.Is(io.EOF, err) {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -304,24 +303,17 @@ func ReadTrips() ([]Trip, error) {
 		}
 
 		t := Trip{
-			RouteId: row[cols["route_id"]],
-			TripId : row[cols["trip_id"]],
-			ServiceId : row[cols["service_id"]],
+			RouteId:      row[cols["route_id"]],
+			TripId:       row[cols["trip_id"]],
+			ServiceId:    row[cols["service_id"]],
 			TripHeadSign: row[cols["trip_headsign"]],
-			DirectionId: row[cols["direction_id"]],
-			ShapeId : row[cols["shape_id"]],
+			DirectionId:  row[cols["direction_id"]],
+			ShapeId:      row[cols["shape_id"]],
 		}
 
 		trips = append(trips, t)
 	}
 	return trips, nil
-}
-
-func appendSet(set []string, elm string) []string {
-	if !slices.Contains(set, elm) {
-		set = append(set, elm)
-	}
-	return set
 }
 
 // map subway line (e.g. "A") to its url
@@ -331,16 +323,22 @@ func appendSet(set []string, elm string) []string {
 // returns subway line -> feed, station id -> feed, station id -> line, err
 func GetMappings() (map[Subway]SubwayRealTimeFeedURL, map[string]SubwayRealTimeFeedURL, error) {
 	trips, err := ReadTrips()
-	if err != nil {return nil, nil, err}
+	if err != nil {
+		return nil, nil, err
+	}
 
 	stopTimes, err := ReadStopTimes()
-	if err != nil {return nil, nil, err}
+	if err != nil {
+		return nil, nil, err
+	}
 
 	// stop id -> trip ids
 	stopToTrip := make(map[string][]string)
 	for _, stopTime := range stopTimes {
 		stationId, _, err := ParseStopId(stopTime.StopId)
-		if err != nil { return nil, nil, err }
+		if err != nil {
+			return nil, nil, err
+		}
 		stopToTrip[stationId] = append(stopToTrip[stationId], stopTime.TripId)
 	}
 
@@ -350,8 +348,8 @@ func GetMappings() (map[Subway]SubwayRealTimeFeedURL, map[string]SubwayRealTimeF
 		tripToRoute[trip.TripId] = trip.RouteId
 	}
 
-	lineToFeed := make(map[Subway]SubwayRealTimeFeedURL) 
-	stationToFeed := make(map[string]SubwayRealTimeFeedURL) 
+	lineToFeed := make(map[Subway]SubwayRealTimeFeedURL)
+	stationToFeed := make(map[string]SubwayRealTimeFeedURL)
 	for stopId, tripIds := range stopToTrip {
 		for _, tripId := range tripIds {
 			if routeId, ok := tripToRoute[tripId]; ok {

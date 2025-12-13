@@ -41,8 +41,11 @@ func arrivals(w http.ResponseWriter, r *http.Request) {
 			times[i] = arrival.ArrivalTime.Format("15:04:05")
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(times)
-
+		err := json.NewEncoder(w).Encode(times)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return

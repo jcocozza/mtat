@@ -16,6 +16,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "commands:")
 	fmt.Fprintln(os.Stderr, "  feed        return feed url for station id")
+	fmt.Fprintln(os.Stderr, "  lines       list subway lines and corresponding feed url")
 	fmt.Fprintln(os.Stderr, "  stations    list station ids and their common names")
 	fmt.Fprintln(os.Stderr, "  serve       serve arrival times on an http server")
 	fmt.Fprintln(os.Stderr, "  arrivals    get arrival times for a station")
@@ -37,7 +38,11 @@ func main() {
 	switch args[0] {
 	case "feed":
 		feedCmd := flag.NewFlagSet("feed", flag.ExitOnError)
-		feedCmd.Parse(args[1:])
+		err := feedCmd.Parse(args[1:])
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		feedArgs := feedCmd.Args()
 		if len(feedArgs) == 0 {
 			fmt.Fprintln(os.Stderr, "station id required")
@@ -45,29 +50,64 @@ func main() {
 		}
 		stationId := feedArgs[0]
 		_, lineToStation, err := GetMappings()
-		if err != nil { panic(err) }
+		if err != nil {
+			panic(err)
+		}
 
-		feed, ok := lineToStation[stationId]; 
+		feed, ok := lineToStation[stationId]
 		if !ok {
 			fmt.Fprintf(os.Stderr, "invalid station id: %s\n", stationId)
 			os.Exit(1)
 		}
-		fmt.Fprintln(os.Stdout, feed)
+		_, err = fmt.Fprintln(os.Stdout, feed)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		return
 	case "stations":
 		stationsCmd := flag.NewFlagSet("stations", flag.ExitOnError)
 		delimiter := stationsCmd.String("d", "\t", "delimiter")
-		stationsCmd.Parse(args[1:])
+		err := stationsCmd.Parse(args[1:])
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		stations, err := ReadStations()
-		if err != nil { panic(err) }
+		if err != nil {
+			panic(err)
+		}
 		for _, station := range stations {
-			fmt.Fprintf(os.Stdout, "%s%s%s\n", station.Id, *delimiter, station.Name)
+			_, err := fmt.Fprintf(os.Stdout, "%s%s%s\n", station.Id, *delimiter, station.Name)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				os.Exit(1)
+			}
+		}
+	case "lines":
+		linesCmd := flag.NewFlagSet("lines", flag.ExitOnError)
+		delimiter := linesCmd.String("d", "\t", "delimiter")
+		err := linesCmd.Parse(args[1:])
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		for subway, url := range SubwayFeedMap {
+			_, err := fmt.Fprintf(os.Stdout, "%s%s%s\n", subway, *delimiter, url)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				os.Exit(1)
+			}
 		}
 	case "serve":
 		saCmd := flag.NewFlagSet("serve", flag.ExitOnError)
 		port := saCmd.Int("port", 8080, "port to run the server on")
-		saCmd.Parse(args[1:])
-		err := Serve(*port)
+		err := saCmd.Parse(args[1:])
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		err = Serve(*port)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
@@ -81,9 +121,11 @@ func main() {
 			fmt.Fprintln(os.Stderr, "get upcoming arrivals by station")
 			arrivalsCmd.PrintDefaults()
 		}
-
-		arrivalsCmd.Parse(args[1:])
-
+		err := arrivalsCmd.Parse(args[1:])
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		stationArgs := arrivalsCmd.Args()
 		if len(stationArgs) != 1 {
 			fmt.Fprintln(os.Stderr, "missing station id")
@@ -112,8 +154,10 @@ func main() {
 			arrivals = append(arrivals, a...)
 		}
 
+		fmt.Println("arrival time, route id, stop id")
 		for _, arrival := range arrivals {
-			fmt.Println(arrival.ArrivalTime.Format("15:04:05"))
+			//fmt.Println(arrival.ArrivalTime.Format("15:04:05"))
+			fmt.Println(arrival.ArrivalTime, arrival.RouteID, arrival.StopID)
 		}
 	}
 }

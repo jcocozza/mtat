@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sort"
 	"slices"
+	"sort"
 	"time"
 
 	"github.com/MobilityData/gtfs-realtime-bindings/golang/gtfs"
@@ -25,7 +25,7 @@ func getFeed(url SubwayRealTimeFeedURL) (*gtfs.FeedMessage, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Bad request: %d", resp.StatusCode)
+		return nil, fmt.Errorf("bad request: %d", resp.StatusCode)
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -81,22 +81,28 @@ func futureArrivals(feed *gtfs.FeedMessage, stopIDs []string) ([]Arrival, error)
 		}
 	}
 	sort.Slice(arrivals, func(i, j int) bool {
-        return arrivals[i].ArrivalTime.Before(arrivals[j].ArrivalTime)
-    })
+		return arrivals[i].ArrivalTime.Before(arrivals[j].ArrivalTime)
+	})
 	return arrivals, nil
 }
 
 // get the next hour of arrivals for a given stop
 func GetFutureArrivals(stopID string) ([]Arrival, error) {
 	_, stationIds, err := GetMappings()
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	stationId, _, err := ParseStopId(stopID)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	url, ok := stationIds[stationId]
 	if !ok {
-		return nil, fmt.Errorf("unknown stop id: %s. no associated feed url\n", stopID)
+		return nil, fmt.Errorf("unknown stop id: %s. no associated feed url", stopID)
 	}
 	feed, err := getFeed(url)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return futureArrivals(feed, []string{stopID})
 }
