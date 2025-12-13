@@ -13,9 +13,20 @@ import (
 )
 
 type Arrival struct {
-	RouteID     string
-	StopID      string
-	ArrivalTime time.Time
+	// this is the subway line
+	RouteID string `json:"route_id"`
+	// station id + direction
+	StopID string `json:"stop_id"`
+	// N or S
+	Direction   string    `json:"direction"`
+	ArrivalTime time.Time `json:"arrival_time"`
+}
+
+// sort arrivals from soonest to latest (in place)
+func SortArrivals(arrivals []Arrival) {
+	sort.Slice(arrivals, func(i, j int) bool {
+		return arrivals[i].ArrivalTime.Before(arrivals[j].ArrivalTime)
+	})
 }
 
 func getFeed(url SubwayRealTimeFeedURL) (*gtfs.FeedMessage, error) {
@@ -73,16 +84,19 @@ func futureArrivals(feed *gtfs.FeedMessage, stopIDs []string) ([]Arrival, error)
 			if arrivalTime.Before(now) {
 				continue
 			}
+			_, direction, err := ParseStopId(stopID)
+			if err != nil {
+				return nil, err
+			}
 			arrivals = append(arrivals, Arrival{
 				RouteID:     routeID,
 				StopID:      stopID,
+				Direction:   direction,
 				ArrivalTime: arrivalTime,
 			})
 		}
 	}
-	sort.Slice(arrivals, func(i, j int) bool {
-		return arrivals[i].ArrivalTime.Before(arrivals[j].ArrivalTime)
-	})
+	SortArrivals(arrivals)
 	return arrivals, nil
 }
 

@@ -36,12 +36,8 @@ func arrivals(w http.ResponseWriter, r *http.Request) {
 			arrivals = append(arrivals, a...)
 		}
 
-		times := make([]string, len(arrivals))
-		for i, arrival := range arrivals {
-			times[i] = arrival.ArrivalTime.Format("15:04:05")
-		}
 		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(times)
+		err := json.NewEncoder(w).Encode(arrivals)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
